@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Postulación · Mentoría 1 a 1 — Xander.sg</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000;
+    --ink:#ffffff;
+    --muted:#7d7d7d;
+    --line:rgba(255,255,255,.16);
+    --line-soft:rgba(255,255,255,.08);
+    --hero-h:46dvh;
+    --pad:24px;
+    --font:"Outfit", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --green:#0AA757;
+    --green-hi:#2BD47A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .app{
+    position:relative;height:100dvh;width:100%;max-width:480px;margin:0 auto;
+    display:flex;flex-direction:column;overflow:hidden;background:var(--bg);
+    animation:appIn .7s ease both;
+  }
+  @keyframes appIn{from{opacity:0}to{opacity:1}}
+
+  /* capa de partículas + glow ambiental */
+  .fx{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+  .panel>.top,.panel>.stage{position:relative;z-index:1}
+  .panel::after{content:"";position:absolute;left:50%;bottom:-8%;width:130%;height:55%;transform:translateX(-50%);
+    background:radial-gradient(ellipse at center, rgba(10,167,87,.09), rgba(10,167,87,0) 70%);
+    pointer-events:none;z-index:0}
+
+  /* ===== HERO (foto fija) ===== */
+  .hero{position:relative;flex:0 0 var(--hero-h);overflow:hidden;background:#111}
+  .hero img{
+    width:100%;height:100%;object-fit:cover;object-position:55% 8%;display:block;
+    filter:grayscale(100%) contrast(1.03);
+  }
+  .hero::after{
+    content:"";position:absolute;left:0;right:0;bottom:-1px;height:50%;
+    background:linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,.3) 50%, #000 100%);
+    pointer-events:none;
+  }
+
+  /* ===== PANEL ===== */
+  .panel{
+    flex:1 1 auto;position:relative;display:flex;flex-direction:column;
+    padding:18px var(--pad) calc(22px + env(safe-area-inset-bottom));min-height:0;
+  }
+
+  .top{display:flex;align-items:center;gap:14px;margin-bottom:14px;flex:0 0 auto}
+  .back{
+    width:30px;height:30px;flex:0 0 auto;border:none;background:transparent;color:#fff;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;margin-left:-6px;
+  }
+  .back:disabled{opacity:0;pointer-events:none}
+  .back:active:not(:disabled){transform:scale(.88)}
+  .back svg{width:20px;height:20px}
+  .bar-wrap{flex:1 1 auto}
+  .bar-meta{display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:8px}
+  .bar-meta .brand{color:#bdbdbd}
+  .bar{height:3px;background:var(--line-soft);border-radius:100px;position:relative}
+  .bar i{display:block;height:100%;width:0;background:var(--green);border-radius:100px;position:relative;
+    box-shadow:0 0 8px rgba(10,167,87,.6);transition:width .6s cubic-bezier(.2,.7,.2,1)}
+  .bar i::after{content:"";position:absolute;right:-1px;top:50%;width:7px;height:7px;border-radius:50%;
+    background:var(--green-hi);transform:translateY(-50%);box-shadow:0 0 9px 2px rgba(43,212,122,.85);
+    animation:headPulse 1.5s ease-in-out infinite}
+  @keyframes headPulse{0%,100%{opacity:.55;transform:translateY(-50%) scale(.75)}50%{opacity:1;transform:translateY(-50%) scale(1.2)}}
+
+  /* ===== STAGE / PREGUNTA ===== */
+  .stage{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .stage::-webkit-scrollbar{display:none}
+
+  .scrollcue{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);
+    width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:rgba(0,0,0,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+    border:1px solid rgba(255,255,255,.2);opacity:0;pointer-events:none;
+    transition:opacity .3s ease;z-index:9}
+  .scrollcue svg{width:16px;height:16px}
+  .scrollcue.show{opacity:1;animation:cueBounce 1.4s ease-in-out infinite}
+  @keyframes cueBounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(4px)}}
+  @media (prefers-reduced-motion: reduce){.scrollcue.show{animation:none}}
+  .q{min-height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:12px 0;gap:0}
+  .q.enter>*{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+  .q.leaving{animation:fall .2s ease forwards}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fall{to{opacity:0;transform:translateY(-10px)}}
+
+  .prompt{font-weight:500;letter-spacing:-.015em;text-wrap:balance;margin:0 auto}
+  .prompt.lg{font-size:clamp(26px,7vw,32px);line-height:1.12;max-width:15ch}
+  .prompt.md{font-size:clamp(22px,5.8vw,27px);line-height:1.2;max-width:20ch}
+  .prompt.sm{font-size:clamp(18px,4.7vw,22px);line-height:1.34;max-width:26ch}
+  .prompt .w{display:inline-block;opacity:0;transform:translateY(14px);animation:wordIn .55s cubic-bezier(.2,.7,.2,1) forwards}
+  .q.enter>.prompt{animation:none}
+  @keyframes wordIn{to{opacity:1;transform:translateY(0)}}
+  .desc{font-size:14.5px;line-height:1.55;color:#bcbcbc;margin-top:14px;font-weight:300;max-width:34ch}
+  .desc b{color:#fff;font-weight:500}
+
+  .opts{display:flex;flex-direction:column;gap:10px;margin-top:26px;width:100%}
+  .opt{
+    position:relative;overflow:hidden;width:100%;cursor:pointer;background:rgba(255,255,255,.04);
+    border:1px solid var(--line);color:#fff;border-radius:13px;
+    padding:16px 18px;font-size:15px;line-height:1.35;font-weight:400;font-family:var(--font);
+    text-align:center;transition:transform .14s ease, border-color .25s, opacity .4s ease;
+  }
+  .opt>span{position:relative;z-index:1;transition:color .3s}
+  .opt::before{content:"";position:absolute;inset:0;background:var(--green);transform:scaleX(0);transform-origin:left;
+    transition:transform .42s cubic-bezier(.2,.7,.2,1);z-index:0}
+  .opt:active{transform:scale(.985)}
+  @media(hover:hover){.opt:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,255,.08)}}
+  .opt.sel{border-color:var(--green-hi)}
+  .opt.sel::before{transform:scaleX(1)}
+  .opt.sel>span{color:#fff;font-weight:600}
+  .opt.dim{opacity:.22}
+
+  /* beneficios (P8) */
+  .benefits{display:flex;flex-direction:column;gap:13px;margin-top:24px;text-align:left}
+  .ben{display:flex;align-items:flex-start;gap:12px;font-size:14.5px;line-height:1.4;font-weight:300;opacity:0}
+  .q.enter .ben{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+  .ben .ck{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .ben .ck svg{width:11px;height:11px}
+  .ben.more{color:var(--muted);font-weight:300}
+  .ben.more .ck{background:transparent}
+
+  /* inputs */
+  .field{margin-top:30px;width:100%}
+  .field input{
+    width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--line);
+    color:#fff;font-family:var(--font);font-weight:400;font-size:24px;text-align:center;
+    padding:8px 4px 14px;outline:none;transition:border-color .25s;
+  }
+  .field input::placeholder{color:#444;font-weight:300}
+  .field input:focus{border-color:var(--green-hi)}
+  .hint{font-size:12px;color:var(--muted);margin-top:14px;font-weight:300}
+
+  .statement{font-size:16px;line-height:1.62;color:#dcdcdc;font-weight:300;max-width:42ch;margin:16px auto 0;text-wrap:pretty}
+  .pricecard{position:relative;overflow:hidden;margin:22px auto 2px;width:100%;max-width:360px;text-align:center;
+    border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:22px 20px;
+    background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02))}
+  .pricecard::before{content:"";position:absolute;top:0;left:-60%;width:48%;height:100%;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.12),transparent);transform:skewX(-18deg);
+    animation:priceShine 4.6s ease-in-out infinite}
+  @keyframes priceShine{0%{left:-60%}38%{left:170%}100%{left:170%}}
+  .price-label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .price-amount{display:inline-flex;align-items:flex-start;justify-content:center;gap:1px;
+    font-weight:700;font-size:clamp(48px,15vw,62px);line-height:1;letter-spacing:-.02em;margin:8px 0 7px}
+  .price-amount .cur{font-size:.5em;font-weight:600;margin-top:.16em}
+  .price-amount .usd{font-size:.26em;font-weight:700;color:var(--muted);letter-spacing:.12em;margin-top:.5em;margin-left:5px}
+  .price-note{font-size:12.5px;color:#bfbfbf;font-weight:300;line-height:1.4}
+  .subq{font-size:clamp(19px,5vw,23px);font-weight:500;letter-spacing:-.01em;text-align:center;margin:24px auto 0;max-width:24ch;line-height:1.2}
+  .guarantee{margin:18px auto 0;max-width:40ch;text-align:center;display:flex;flex-direction:column;gap:5px;
+    border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.04);border-radius:14px;padding:14px 18px}
+  .g-tag{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--green-hi)}
+  .g-text{font-size:14px;line-height:1.55;color:#cfcfcf;font-weight:300}
+  .steps{display:flex;flex-direction:column;gap:14px;margin:22px auto 0;max-width:40ch;text-align:left}
+  .step{display:flex;gap:13px;align-items:flex-start}
+  .step .n{flex:0 0 auto;width:27px;height:27px;border-radius:50%;border:1px solid rgba(43,212,122,.55);
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--green-hi);margin-top:1px}
+  .step .st{font-size:14.5px;line-height:1.5;color:#dcdcdc;font-weight:300}
+  .q.enter>.steps{animation:none}
+  .q.enter .step{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+  .tagline{position:relative;margin:26px auto 2px;text-align:center;font-size:clamp(17px,4.8vw,21px);font-weight:600;letter-spacing:-.01em;color:#fff}
+  .tagline span{position:relative;display:inline-block;padding-bottom:9px}
+  .tagline span::after{content:"";position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:38px;height:2px;border-radius:2px;background:var(--green)}
+  .phone{display:flex;gap:10px;width:100%}
+  .cc{flex:0 0 auto;max-width:46%;
+    background:rgba(255,255,255,.05) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23fff' stroke-width='1.4' fill='none'/%3E%3C/svg%3E") no-repeat right 11px center;
+    border:1px solid var(--line);color:#fff;border-radius:12px;padding:14px 28px 14px 12px;
+    font-family:var(--font);font-size:16px;-webkit-appearance:none;appearance:none;outline:none;cursor:pointer}
+  .cc option{color:#000}
+  .phone input{flex:1 1 auto;min-width:0;background:rgba(255,255,255,.05);border:1px solid var(--line);
+    border-radius:12px;color:#fff;font-family:var(--font);font-size:17px;font-weight:400;text-align:left;
+    padding:14px 14px;outline:none;transition:border-color .25s}
+  .phone input::placeholder{color:#5a5a5a;font-weight:300;font-size:15px}
+  .phone input:focus,.cc:focus{border-color:var(--green-hi)}
+
+  .cta-wrap{margin-top:30px;width:100%}
+  .cta{
+    width:100%;border:none;cursor:pointer;background:#fff;color:#000;border-radius:13px;
+    padding:17px;font-family:var(--font);font-size:16px;font-weight:600;letter-spacing:.01em;
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    transition:transform .14s ease, opacity .2s;
+  }
+  .cta:active{transform:scale(.98)}
+  .cta:disabled{opacity:.3;cursor:default}
+  .cta svg{width:16px;height:16px}
+  .cta svg path{stroke:#000}
+
+  /* ===== FINAL ===== */
+  .done{position:absolute;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:36px 30px;opacity:0;pointer-events:none;transition:opacity .5s ease;z-index:20}
+  .done.show{opacity:1;pointer-events:auto}
+  .done .seal{position:relative;width:72px;height:72px;border-radius:50%;border:1.5px solid var(--green-hi);display:flex;align-items:center;justify-content:center;margin-bottom:28px;animation:pop .6s cubic-bezier(.2,1.3,.4,1) both}
+  .done .seal::after{content:"";position:absolute;inset:-28px;border-radius:50%;z-index:-1;
+    background:radial-gradient(circle, rgba(10,167,87,.22), rgba(10,167,87,0) 65%);opacity:0;transition:opacity .7s .35s}
+  .done.show .seal{animation-delay:.1s}
+  .done.show .seal::after{opacity:1}
+  .done .seal svg{width:32px;height:32px}
+  .done .seal svg path{stroke:var(--green-hi);stroke-dasharray:34;stroke-dashoffset:34}
+  .done.show .seal svg path{animation:draw .5s ease forwards .5s}
+  @keyframes pop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .done h2{font-weight:500;font-size:27px;line-height:1.15;letter-spacing:-.01em;margin-bottom:16px}
+  .done p{font-size:15px;line-height:1.6;color:#bcbcbc;max-width:330px;font-weight:300}
+  .done p b{color:#fff;font-weight:500}
+  .done .mini{margin-top:32px;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .done-accel{margin-top:24px;max-width:340px;display:flex;flex-direction:column;gap:5px;text-align:center;
+    border:1px solid rgba(37,211,102,.35);background:rgba(37,211,102,.08);border-radius:14px;padding:13px 18px;
+    opacity:0;transform:translateY(8px)}
+  .done.show .done-accel{animation:homeIn .5s ease forwards;animation-delay:.35s}
+  .accel-tag{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#25D366}
+  .accel-line{font-size:14px;line-height:1.5;color:#eaeaea;font-weight:400}
+  .done-wa{display:inline-flex;align-items:center;justify-content:center;gap:9px;margin-top:16px;text-decoration:none;
+    background:#25D366;color:#0a0a0a;border-radius:13px;padding:15px 28px;font-family:var(--font);font-size:15.5px;font-weight:600;letter-spacing:.01em;
+    box-shadow:0 10px 30px rgba(37,211,102,.30);opacity:0;transform:translateY(8px)}
+  .done.show .done-wa{animation:homeIn .5s ease forwards;animation-delay:.45s}
+  .done-wa:active{transform:scale(.97)}
+  .done-wa svg{width:21px;height:21px}
+  .done-home{display:inline-flex;align-items:center;justify-content:center;margin-top:14px;text-decoration:none;
+    border:1px solid var(--line);color:#fff;background:rgba(255,255,255,.04);border-radius:13px;
+    padding:13px 26px;font-family:var(--font);font-size:14.5px;font-weight:500;letter-spacing:.01em;
+    opacity:0;transform:translateY(8px);transition:transform .14s ease, background .2s, border-color .2s}
+  .done.show .done-home{animation:homeIn .5s ease forwards;animation-delay:.55s}
+  @keyframes homeIn{to{opacity:1;transform:translateY(0)}}
+  .done-home:active{transform:scale(.97)}
+  @media(hover:hover){.done-home:hover{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.09)}}
+
+  .sending{position:absolute;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:25}
+  .sending.show{display:flex}
+  .spin{width:32px;height:32px;border:2.5px solid rgba(255,255,255,.2);border-top-color:var(--green-hi);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  @media (max-height:680px){:root{--hero-h:38dvh}}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.05ms !important}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hero"><img src="assets/mentoria-xander.jpg" alt="Xander.sg"></div>
+
+  <div class="panel">
+    <canvas class="fx" id="fx"></canvas>
+    <div class="top">
+      <button class="back" id="back" aria-label="Atrás" disabled>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="bar-wrap">
+        <div class="bar-meta"><span class="brand">Tu postulación</span><span id="count">1 / 14</span></div>
+        <div class="bar"><i id="fill"></i></div>
+      </div>
+    </div>
+    <div class="stage" id="stage"></div>
+    <div class="scrollcue" id="scrollcue" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+
+  <div class="sending" id="sending"><div class="spin"></div></div>
+
+  <div class="done" id="done">
+    <div class="seal"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <h2 id="doneTitle">Postulación recibida</h2>
+    <p id="doneText"></p>
+    <div class="done-accel" id="doneAccel">
+      <span class="accel-tag">⚡ Acelera tu proceso</span>
+      <span class="accel-line">Escríbeme directo por WhatsApp y avanza más rápido en tu selección.</span>
+    </div>
+    <a class="done-wa" id="done-wa"><svg viewBox="0 0 32 32" fill="#0a0a0a" aria-hidden="true"><path d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.6 1.8 6.5L3 29l7.2-2.3c1.8 1 3.9 1.5 5.8 1.5 7 0 12.5-5.5 12.5-12.5S23 3 16 3zm0 22.7c-1.8 0-3.5-.5-5-1.4l-.4-.2-4.3 1.4 1.4-4.2-.3-.4a10 10 0 0 1-1.6-5.4C5.8 9.9 10.4 5.3 16 5.3s10.2 4.6 10.2 10.2S21.6 25.7 16 25.7zm5.7-7.6c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2s-.8 1-1 1.2c-.2.2-.4.2-.7.1-1.8-.9-3-1.6-4.2-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5l-1-2.3c-.3-.6-.5-.5-.7-.6h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.2 3.4 5.4 4.8 2 .9 2.8.9 3.8.8.6-.1 1.8-.7 2.1-1.5.3-.7.3-1.4.2-1.5-.1-.1-.3-.2-.6-.3z"/></svg>Escríbeme por WhatsApp</a>
+    <div class="mini">MENTORÍA 1 A 1 · Xander.sg</div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG — PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
+   ============================================================ */
+const SCRIPT_URL = "PEGA_AQUI_LA_URL_DEL_APPS_SCRIPT_DE_XANDER";
+
+/* Link o número de WhatsApp para el botón "Escríbeme por WhatsApp" */
+const WHATSAPP_DIRECTO = "https://wa.link/bl3pfq";
+
+const COUNTRIES = [
+ {n:"Colombia",c:"+57",f:"🇨🇴"},
+ {n:"México",c:"+52",f:"🇲🇽"},
+ {n:"Argentina",c:"+54",f:"🇦🇷"},
+ {n:"Perú",c:"+51",f:"🇵🇪"},
+ {n:"Chile",c:"+56",f:"🇨🇱"},
+ {n:"Ecuador",c:"+593",f:"🇪🇨"},
+ {n:"Venezuela",c:"+58",f:"🇻🇪"},
+ {n:"Bolivia",c:"+591",f:"🇧🇴"},
+ {n:"Paraguay",c:"+595",f:"🇵🇾"},
+ {n:"Uruguay",c:"+598",f:"🇺🇾"},
+ {n:"Guatemala",c:"+502",f:"🇬🇹"},
+ {n:"Honduras",c:"+504",f:"🇭🇳"},
+ {n:"El Salvador",c:"+503",f:"🇸🇻"},
+ {n:"Nicaragua",c:"+505",f:"🇳🇮"},
+ {n:"Costa Rica",c:"+506",f:"🇨🇷"},
+ {n:"Panamá",c:"+507",f:"🇵🇦"},
+ {n:"Rep. Dominicana",c:"+1",f:"🇩🇴"},
+ {n:"Cuba",c:"+53",f:"🇨🇺"},
+ {n:"Puerto Rico",c:"+1",f:"🇵🇷"},
+ {n:"España",c:"+34",f:"🇪🇸"},
+ {n:"Estados Unidos",c:"+1",f:"🇺🇸"},
+ {n:"Canadá",c:"+1",f:"🇨🇦"},
+ {n:"Brasil",c:"+55",f:"🇧🇷"},
+ {n:"Portugal",c:"+351",f:"🇵🇹"},
+ {n:"Italia",c:"+39",f:"🇮🇹"},
+ {n:"Francia",c:"+33",f:"🇫🇷"},
+ {n:"Alemania",c:"+49",f:"🇩🇪"},
+ {n:"Reino Unido",c:"+44",f:"🇬🇧"}
+];
+
+const QUESTIONS = [
+  { key:"nombre", type:"text", inputType:"text",
+    prompt:"¿Cuál es tu nombre?", placeholder:"Tu nombre", cta:"Continuar" },
+
+  { key:"pais", type:"text", inputType:"text",
+    prompt:"¿En qué país vives actualmente?", placeholder:"Tu país", cta:"Continuar" },
+
+  { key:"edad", type:"choice", prompt:"¿Cuál es tu edad?",
+    options:[
+      "18 - 24 años",
+      "25 - 34 años",
+      "35 - 44 años",
+      "45 años o más"
+    ]},
+
+  { key:"whatsapp", type:"phone",
+    prompt:"¿Cuál es tu WhatsApp?",
+    body:"Lo usaré solo para contactarte sobre tu postulación.",
+    cta:"Continuar" },
+
+  { key:"situacion", type:"choice", prompt:"¿Cuál es tu situación actual?",
+    options:[
+      "Soy empleado y busco una fuente de ingresos adicional",
+      "Soy independiente o emprendedor",
+      "Estoy desempleado y busco una nueva fuente de ingresos",
+      "Ya me dedico al trading pero no obtengo resultados consistentes"
+    ]},
+
+  { key:"ingresos", type:"choice", prompt:"¿Cuánto ganas al mes con tu trabajo?",
+    options:[
+      "Menos de $500 USD",
+      "Entre $500 y $1.500 USD",
+      "Entre $1.500 y $3.000 USD",
+      "Más de $3.000 USD"
+    ]},
+
+  { key:"conocimiento", type:"choice", prompt:"¿Cuánto sabes sobre trading actualmente?",
+    options:[
+      "No sé nada, soy completamente nuevo",
+      "Conozco lo básico pero nunca he operado en real",
+      "He operado pero sin resultados consistentes",
+      "Ya tengo experiencia pero no logro fondearme"
+    ]},
+
+  { key:"formacion", type:"choice", prompt:"¿Has invertido antes en algún curso, mentoría o formación de trading?",
+    options:[
+      "No, nunca he pagado por formación en trading",
+      "Sí, he invertido pero no obtuve los resultados esperados",
+      "Sí, y me ayudó pero necesito llevar mi nivel al siguiente paso",
+      "He intentado aprender solo sin pagar nada"
+    ]},
+
+  { key:"capital", type:"choice", prompt:"¿Con qué operas actualmente?",
+    options:[
+      "Capital propio",
+      "Cuentas de fondeo",
+      "Ambas",
+      "Ninguna por el momento"
+    ]},
+
+  { key:"impedimento", type:"choice", prompt:"¿Por qué no logras retirar de forma consistente?",
+    options:[
+      "No tengo una estrategia rentable",
+      "Me falta disciplina y gestión emocional",
+      "Me hace falta un mentor que me brinde un paso a paso",
+      "Ya opero pero no logro retiros consistentes"
+    ]},
+
+  { key:"beneficios", type:"info",
+    prompt:"Te voy a contar algunas de las cosas que obtendrás al ingresar a mi mentoria 1 a 1:",
+    benefits:[
+      "Operamos en vivo de lunes a viernes",
+      "Llamadas 1 a 1 conmigo en donde te enseño mi estrategia",
+      "Llamadas 1 a 1 conmigo para realizar backtesting de la estrategia",
+      "Grabación de todas las llamadas",
+      "Acceso por 6 meses a mi academia",
+      "Muchas cosas más…"
+    ],
+    cta:"Continuar" },
+
+  { key:"comoFunciona", type:"choice", prompt:"¿Cómo funciona la mentoría?",
+    steps:[
+      "Te enseño mi estrategia paso a paso, aunque estés desde cero.",
+      "Te ayudo a fondear tu primera cuenta, o a escalar tus retiros mensuales si ya estás fondeado.",
+      "Si solo operas capital propio, escalamos tus resultados con una estrategia respaldada por más de 6 años en los mercados."
+    ],
+    tagline:"Trading sencillo, sin complicaciones",
+    guarantee:"Si no lo logramos en los próximos 6 meses, trabajo gratis contigo hasta lograrlo.",
+    options:[ "Estoy de acuerdo", "Me encanta la metodología" ]},
+
+  { key:"decision", type:"choice",
+    body:"Recuerda que mi mentoría tiene una garantía clara: Si no lo logramos en los 6 meses que dura la mentoría, trabajo gratis contigo hasta lograrlo.",
+    options:[ "Estoy de acuerdo con la garantía", "Estoy listo y me gustaría agendar una llamada contigo" ]},
+
+  { key:"compromiso", type:"choice",
+    body:"Esta mentoría es algo realmente serio y trabajo únicamente con personas listas para comprometerse de verdad con un acompañamiento 1 a 1.",
+    price:{ label:"Inversión", amount:"999", note:"Mentoría 1 a 1 · 6 meses de acompañamiento" },
+    question:"¿Qué tan comprometido estás de verdad?",
+    options:[
+      "Estoy 100% comprometido y podría realizar la inversión ahora mismo",
+      "Podría hacerlo pero necesito facilidades de pago",
+      "Honestamente no tengo los recursos en este momento"
+    ]}
+];
+
+const answers = {};
+let i = 0;
+const stage = document.getElementById('stage');
+const fill = document.getElementById('fill');
+const count = document.getElementById('count');
+const backBtn = document.getElementById('back');
+const scrollcue = document.getElementById('scrollcue');
+const TOTAL = QUESTIONS.length;
+
+function updateScrollCue(){
+  if(!scrollcue) return;
+  const more = stage.scrollHeight - stage.scrollTop - stage.clientHeight;
+  scrollcue.classList.toggle('show', more > 12);
+}
+stage.addEventListener('scroll', updateScrollCue, {passive:true});
+window.addEventListener('resize', ()=> setTimeout(updateScrollCue, 100));
+
+const CK = `<svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const ARROW = `<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+function wordSpans(text){
+  return text.split(' ').map((w,idx)=>`<span class="w" style="animation-delay:${60+idx*48}ms">${w}</span>`).join(' ');
+}
+
+function promptClass(t){
+  const n = t.length;
+  if(n <= 24) return 'lg';
+  if(n <= 50) return 'md';
+  return 'sm';
+}
+
+function updateProgress(){
+  fill.style.width = ((i+1)/TOTAL*100) + "%";
+  count.textContent = (i+1) + " / " + TOTAL;
+  backBtn.disabled = i===0;
+}
+
+function render(){
+  updateProgress();
+  const q = QUESTIONS[i];
+  const wrap = document.createElement('div');
+  wrap.className = 'q enter';
+
+  let html = '';
+  if(q.prompt) html += `<div class="prompt ${promptClass(q.prompt)}">${wordSpans(q.prompt)}</div>`;
+  if(q.body) html += `<div class="statement">${q.body}</div>`;
+  if(q.steps) html += `<div class="steps">` + q.steps.map((st,ix)=>`<div class="step"><span class="n">${ix+1}</span><span class="st">${st}</span></div>`).join('') + `</div>`;
+  if(q.tagline) html += `<div class="tagline"><span>${q.tagline}</span></div>`;
+  if(q.guarantee) html += `<div class="guarantee"><span class="g-tag">Mi garantía</span><span class="g-text">${q.guarantee}</span></div>`;
+
+  if(q.type === 'choice'){
+    if(q.price){
+      html += `<div class="pricecard"><div class="price-label">${q.price.label}</div>`
+           +  `<div class="price-amount"><span class="cur">$</span>${q.price.amount}<span class="usd">USD</span></div>`
+           +  `<div class="price-note">${q.price.note}</div></div>`;
+    }
+    if(q.question){ html += `<div class="subq">${q.question}</div>`; }
+    html += `<div class="opts">` + q.options.map((o,idx)=>
+      `<button class="opt" data-idx="${idx}"><span>${o}</span></button>`
+    ).join('') + `</div>`;
+  }
+
+  if(q.type === 'info'){
+    html += `<div class="benefits">` + q.benefits.map(b=>
+      `<div class="ben"><span class="ck">${CK}</span><span>${b}</span></div>`
+    ).join('') + (q.more?`<div class="ben more"><span class="ck"></span><span>${q.more}</span></div>`:'') + `</div>`;
+    html += `<div class="cta-wrap"><button class="cta" id="cta">${q.cta} ${ARROW}</button></div>`;
+  }
+
+  if(q.type === 'text'){
+    html += `<div class="field"><input id="inp" type="${q.inputType}" placeholder="${q.placeholder}" autocomplete="off" ${q.inputType==='tel'?'inputmode="tel"':''}></div>`;
+    if(q.key==='whatsapp') html += `<div class="hint">Solo lo usaré para contactarte si quedas seleccionado.</div>`;
+    html += `<div class="cta-wrap"><button class="cta" id="cta" disabled>${q.cta} ${ARROW}</button></div>`;
+  }
+
+  if(q.type === 'phone'){
+    html += `<div class="field"><div class="phone">
+        <select class="cc" id="cc" aria-label="País">${COUNTRIES.map(c=>`<option value="${c.c}"${c.n==='Colombia'?' selected':''}>${c.f} ${c.c}</option>`).join('')}</select>
+        <input id="inp" type="tel" inputmode="tel" placeholder="Número de WhatsApp" autocomplete="off">
+      </div></div>`;
+    html += `<div class="hint">Elige tu país y escribe tu número; el código se agrega solo.</div>`;
+    html += `<div class="cta-wrap"><button class="cta" id="cta" disabled>${q.cta} ${ARROW}</button></div>`;
+  }
+
+  wrap.innerHTML = html;
+  stage.innerHTML = '';
+  stage.appendChild(wrap);
+  stage.scrollTop = 0;
+  scrollcue && scrollcue.classList.remove('show');
+  setTimeout(updateScrollCue, 120);
+  setTimeout(updateScrollCue, 650);
+
+  let d = 0;
+  for(const k of wrap.children){ k.style.animationDelay = d+'ms'; d += 70; }
+  if(q.type==='info') wrap.querySelectorAll('.ben').forEach((b,idx)=> b.style.animationDelay = (130 + idx*70)+'ms');
+  wrap.querySelectorAll('.step').forEach((el,ix)=> el.style.animationDelay = (160 + ix*90)+'ms');
+
+  if(q.type==='choice'){
+    wrap.querySelectorAll('.opt').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        if(wrap.classList.contains('leaving') || wrap.querySelector('.opt.sel')) return;
+        if(navigator.vibrate) navigator.vibrate(12);
+        wrap.querySelectorAll('.opt').forEach(b=>{ if(b!==btn) b.classList.add('dim'); });
+        btn.classList.add('sel');
+        answers[q.key] = q.options[+btn.dataset.idx];
+        setTimeout(next, 520);
+      });
+    });
+  }
+  if(q.type==='info'){
+    document.getElementById('cta').addEventListener('click',()=>{ if(navigator.vibrate)navigator.vibrate(12); answers[q.key]='Sí'; next(); });
+  }
+  if(q.type==='text'){
+    const inp = document.getElementById('inp');
+    const cta = document.getElementById('cta');
+    const valid = ()=> q.inputType==='tel'
+      ? (inp.value.replace(/\D/g,'').length>=7)
+      : inp.value.trim().length>=2;
+    inp.addEventListener('input',()=> cta.disabled = !valid());
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter' && valid()) commitText(q,inp); });
+    cta.addEventListener('click',()=>{ if(valid()) commitText(q,inp); });
+    setTimeout(()=>inp.focus(), 450);
+  }
+  if(q.type==='phone'){
+    const inp = document.getElementById('inp');
+    const cc = document.getElementById('cc');
+    const cta = document.getElementById('cta');
+    const valid = ()=> inp.value.replace(/\D/g,'').length>=7;
+    inp.addEventListener('input',()=> cta.disabled = !valid());
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter' && valid()) commitPhone(cc,inp); });
+    cta.addEventListener('click',()=>{ if(valid()){ if(navigator.vibrate)navigator.vibrate(12); commitPhone(cc,inp);} });
+    setTimeout(()=>inp.focus(), 450);
+  }
+}
+
+function commitText(q,inp){
+  answers[q.key] = inp.value.trim();
+  if(q.key==='whatsapp'){ submit(); return; }
+  next();
+}
+
+function commitPhone(cc,inp){
+  const num = inp.value.replace(/[^\d]/g,'');
+  answers.whatsapp = cc.value + ' ' + num;
+  next();
+}
+
+function next(){
+  if(answers.whatsapp && window.savePostulacion) window.savePostulacion({...answers}, false);
+  const cur = stage.querySelector('.q');
+  if(cur) cur.classList.add('leaving');
+  if(i >= TOTAL-1){ setTimeout(submit, 200); return; }
+  setTimeout(()=>{ i++; render(); }, 200);
+}
+function back(){
+  if(i===0) return;
+  const cur = stage.querySelector('.q');
+  if(cur) cur.classList.add('leaving');
+  setTimeout(()=>{ i--; render(); }, 190);
+}
+backBtn.addEventListener('click', back);
+
+function submit(){
+  document.getElementById('sending').classList.add('show');
+  const payload = {
+    nombre:answers.nombre||'', pais:answers.pais||'', edad:answers.edad||'', situacion:answers.situacion||'', ingresos:answers.ingresos||'',
+    conocimiento:answers.conocimiento||'', horas:answers.horas||'', formacion:answers.formacion||'',
+    capital:answers.capital||'',
+    impedimento:answers.impedimento||'', comoFunciona:answers.comoFunciona||'',
+    compromiso:answers.compromiso||'', decision:answers.decision||'', whatsapp:answers.whatsapp||''
+  };
+  if(window.savePostulacion) window.savePostulacion({...answers}, true);
+  const finish = ()=>{
+    document.getElementById('sending').classList.remove('show');
+    fill.style.width = '100%';
+    const name = (answers.nombre||'').split(' ')[0];
+    document.getElementById('doneTitle').textContent = name ? `¡Gracias, ${name}!` : '¡Postulación recibida!';
+    document.getElementById('doneText').innerHTML =
+      `Tu postulación quedó registrada. Revisaré tu perfil personalmente y, si cumples con los requisitos, te contactaré.`;
+    document.getElementById('done').classList.add('show');
+  };
+  if(!SCRIPT_URL || SCRIPT_URL.indexOf('PEGA_AQUI')===0){ setTimeout(finish,700); return; }
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+    .then(finish).catch(finish);
+}
+
+/* ===== BOTÓN WHATSAPP DIRECTO (pantalla final) ===== */
+(function(){
+  const wa=document.getElementById('done-wa');
+  if(!wa) return;
+  if(WHATSAPP_DIRECTO.indexOf('PEGA')===0){ wa.style.display='none'; const ac=document.getElementById('doneAccel'); if(ac) ac.style.display='none'; return; }
+  let url = WHATSAPP_DIRECTO;
+  if(!/^https?:/i.test(url)){
+    const msg=encodeURIComponent('Hola Xander, acabo de postularme a la mentoría 1 a 1 y quiero acelerar mi proceso 🙏');
+    url='https://wa.me/'+url.replace(/[^0-9]/g,'')+'?text='+msg;
+  }
+  wa.setAttribute('href',url);
+  wa.setAttribute('target','_blank'); wa.setAttribute('rel','noopener');
+})();
+
+/* ===== PARTÍCULAS AMBIENTALES (sutiles) ===== */
+(function(){
+  const c = document.getElementById('fx');
+  if(!c) return;
+  if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const ctx = c.getContext('2d');
+  let w=0,h=0,dpr=1,parts=[];
+  function size(){
+    dpr = Math.min(window.devicePixelRatio||1, 2);
+    const r = c.getBoundingClientRect();
+    w = r.width; h = r.height;
+    c.width = w*dpr; c.height = h*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  function init(){
+    const n = Math.max(20, Math.min(42, Math.round(w*h/13000)));
+    parts = Array.from({length:n}, ()=>({
+      x:Math.random()*w, y:Math.random()*h,
+      r:Math.random()*1.3+.4,
+      vy:-(Math.random()*.16+.04),
+      vx:(Math.random()-.5)*.10,
+      a:Math.random()*.28+.05,
+      tw:Math.random()*Math.PI*2
+    }));
+  }
+  function tick(){
+    ctx.clearRect(0,0,w,h);
+    for(const p of parts){
+      p.y+=p.vy; p.x+=p.vx; p.tw+=0.018;
+      if(p.y<-6){p.y=h+6;p.x=Math.random()*w;}
+      if(p.x<-6)p.x=w+6; if(p.x>w+6)p.x=-6;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,6.283);
+      ctx.fillStyle='rgba(255,255,255,'+(p.a*(0.6+0.4*Math.sin(p.tw)))+')';
+      ctx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+  size(); init();
+  window.addEventListener('resize', ()=>{ size(); init(); });
+  requestAnimationFrame(tick);
+})();
+
+render();
+</script>
+
+<script type="module">
+  /* ===== ENVÍO A FIREBASE (para que las postulaciones lleguen al panel) =====
+     Proyecto Firebase de Xander (xander-postulaciones), el mismo del panel. */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, updateDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyAGRJI8tk2tQm8LQfdEu0ebz7vQ0QaajzA",
+    authDomain: "xander-postulaciones.firebaseapp.com",
+    projectId: "xander-postulaciones",
+    storageBucket: "xander-postulaciones.firebasestorage.app",
+    messagingSenderId: "972106758852",
+    appId: "1:972106758852:web:03efd285650c4100c4a791"
+  };
+  if(firebaseConfig.apiKey.indexOf('PEGA') !== 0){
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let docRef = null, creating = false;
+    /* Guarda la postulación progresivamente: crea el documento la primera vez (cuando ya hay WhatsApp)
+       y lo va actualizando; se marca 'completa' al enviar al final. */
+    window.savePostulacion = (data, completa)=>{
+      const payload = {...data, estado: completa ? 'completa' : 'incompleta',
+                       fecha:new Date().toISOString(), actualizado:serverTimestamp()};
+      if(docRef){ updateDoc(doc(db,'postulaciones', docRef.id), payload).catch(e=>console.error('Firestore:', e)); return; }
+      if(creating) return;
+      creating = true; payload.creadoEn = serverTimestamp();
+      addDoc(collection(db,'postulaciones'), payload)
+        .then(ref=>{ docRef = ref; creating = false; })
+        .catch(e=>{ creating = false; console.error('Firestore:', e); });
+    };
+  }
+</script>
+</body>
+</html>
